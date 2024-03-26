@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Time Sheet</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Zomato-like font */
+    background-color: #f8f9fa; /* Zomato-like background */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 600px;
+    text-align: center;
+  }
+  .container h2 {
+    margin-bottom: 20px;
+    color: #e74c3c; /* Zomato-like color */
+  }
+  .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  .form-group input {
+    width: calc(100% - 16px);
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+  .form-group button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #e74c3c; /* Zomato-like color */
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .form-group button:hover {
+    background-color: #c0392b; /* Darker shade on hover */
+  }
+  table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+  }
+  table, th, td {
+    border: 1px solid #ccc;
+  }
+  th, td {
+    padding: 8px;
+    text-align: left;
+  }
+  th {
+    background-color: #e74c3c; /* Zomato-like color */
+    color: white;
+  }
+  .download-button {
+    margin-top: 20px;
+  }
+  .download-button button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #3498db; /* Zomato-like color */
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .download-button button:hover {
+    background-color: #2980b9; /* Darker shade on hover */
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>YoYo tIme sHeet😊</h2>
+  <form id="timeSheetForm">
+    <div class="form-group">
+      <label for="date">Date:</label>
+      <input type="date" id="date" name="date" required>
+    </div>
+    <div class="form-group">
+      <label for="project">Project:</label>
+      <input type="text" id="project" name="project" placeholder="Enter project name" required>
+    </div>
+    <div class="form-group">
+      <label for="task">Task:</label>
+      <input type="text" id="task" name="task" placeholder="Enter task name" required>
+    </div>
+    <div class="form-group">
+      <label for="hours">Hours:</label>
+      <input type="number" id="hours" name="hours" step="0.5" placeholder="Enter hours (e.g., 1.5)" required>
+    </div>
+    <div class="form-group">
+      <button type="submit">Submit</button>
+    </div>
+  </form>
+  <div id="timeSheetEntries">
+    <!-- Time sheet entries will be displayed here -->
+  </div>
+  <div class="download-button">
+    <button id="downloadExcel">Download Excel</button>
+  </div>
+</div>
+
+<script>
+  // Function to display time sheet entries
+  function displayTimeSheet() {
+    const timeSheet = JSON.parse(localStorage.getItem('timeSheet')) || [];
+    const table = document.createElement('table');
+    const headerRow = table.insertRow();
+    const headers = ['Date', 'Project', 'Task', 'Hours'];
+    headers.forEach(headerText => {
+      const th = document.createElement('th');
+      th.textContent = headerText;
+      headerRow.appendChild(th);
+    });
+    timeSheet.forEach(entry => {
+      const row = table.insertRow();
+      Object.values(entry).forEach(value => {
+        const cell = row.insertCell();
+        cell.textContent = value;
+      });
+    });
+    const timeSheetEntries = document.getElementById('timeSheetEntries');
+    timeSheetEntries.innerHTML = '';
+    timeSheetEntries.appendChild(table);
+  }
+
+  // Display existing time sheet entries on page load
+  window.onload = function() {
+    displayTimeSheet();
+  };
+
+  // Function to handle form submission
+  document.getElementById('timeSheetForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const date = document.getElementById('date').value;
+    const project = document.getElementById('project').value;
+    const task = document.getElementById('task').value;
+    const hours = document.getElementById('hours').value;
+    const timeSheetData = {
+      date: date,
+      project: project,
+      task: task,
+      hours: hours
+    };
+    const timeSheet = JSON.parse(localStorage.getItem('timeSheet')) || [];
+    timeSheet.push(timeSheetData);
+    localStorage.setItem('timeSheet', JSON.stringify(timeSheet));
+    alert('Time sheet entry saved successfully!');
+    document.getElementById('timeSheetForm').reset();
+    displayTimeSheet(); // Update displayed time sheet entries
+  });
+
+  // Function to export time sheet data to Excel
+  document.getElementById('downloadExcel').addEventListener('click', function() {
+    const timeSheet = JSON.parse(localStorage.getItem('timeSheet')) || [];
+    const csvContent = "data:text/csv;charset=utf-8,"
+      + timeSheet.map(entry => Object.values(entry).join(',')).join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'time_sheet.csv');
+    document.body.appendChild(link);
+    link.click();
+  });
+</script>
+
+</body>
+</html>
